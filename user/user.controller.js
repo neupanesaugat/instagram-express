@@ -1,10 +1,8 @@
 import express from "express";
-import Yup from "yup";
-import User from "./user.model.js";
-import bcrypt from "bcrypt";
-import { validateUserSchema } from "./user.validation.js";
 import validateReqBody from "../middlewares/validation.middleware.js";
 import generateHashedPassword from "../utils/password.js";
+import User from "./user.model.js";
+import { validateUserSchema } from "./user.validation.js";
 
 const router = express.Router();
 

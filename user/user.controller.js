@@ -3,35 +3,79 @@ import validateReqBody from "../middlewares/validation.middleware.js";
 import generateHashedPassword from "../utils/password.js";
 import User from "./user.model.js";
 import { validateUserSchema } from "./user.validation.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 //? api(s)
-//* add user
-router.post("/add", validateReqBody(validateUserSchema), async (req, res) => {
-  // extract user from req.body
-  const newUser = req.body;
+//* register user
+router.post(
+  "/register",
+  validateReqBody(validateUserSchema),
+  async (req, res) => {
+    // extract user from req.body
+    const newUser = req.body;
 
-  // find user with provided username
-  const user = await User.findOne({ username: newUser.username });
+    // find user with provided username
+    const user = await User.findOne({ username: newUser.username });
 
-  // if user already exist, throw error
-  if (user) {
-    return res.status(409).send({ message: "User already exist" });
+    // if user already exist, throw error
+    if (user) {
+      return res.status(409).send({ message: "User already exist" });
+    }
+
+    // generate hashed password
+    const plainPassword = newUser.password;
+    const saltRound = 10;
+
+    const hashedPassword = await generateHashedPassword(
+      plainPassword,
+      saltRound
+    );
+    newUser.password = hashedPassword;
+
+    // add to the db
+    await User.create(newUser);
+
+    // send res
+    return res.status(200).send({ message: "User added successfully..." });
+  }
+);
+
+//* login user
+router.get("/login", async (req, res) => {
+  // extract login credentials from req.body
+  const loginCredentials = req.body;
+
+  // find user using the username
+  const user = await User.findOne({ username: loginCredentials.username });
+
+  // if not user, throw error
+  if (!user) {
+    return res.status(404).send({ message: "Invalid credentials!" });
   }
 
-  // generate hashed password
-  const plainPassword = newUser.password;
-  const saltRound = 10;
+  // check for password match
+  const plainPassword = loginCredentials.password;
+  const hashedPassword = user.password;
+  const isPasswordMatch = await bcrypt.compare(plainPassword, hashedPassword);
 
-  const hashedPassword = await generateHashedPassword(plainPassword, saltRound);
-  newUser.password = hashedPassword;
+  // hide password
+  user.password = undefined;
 
-  // add to the db
-  await User.create(newUser);
+  // if don't match, throw error
+  if (!isPasswordMatch) {
+    return res.status(404).send({ message: "Invalid Credentials!" });
+  }
 
-  // send res
-  return res.status(200).send({ message: "User added successfully..." });
+  // generate access token
+  const payload = { username: user.username };
+  const sign = "khfaiuarhlksad";
+  const token = jwt.sign(payload, sign);
+
+  return res
+    .status(200)
+    .send({ message: "Success!!", userDetails: user, accessToken: token });
 });
-
 export default router;

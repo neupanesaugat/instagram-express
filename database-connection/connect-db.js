@@ -1,11 +1,15 @@
-import mongoose, { connect } from "mongoose";
+import mongoose from "mongoose";
+
+const dbUserName = process.env.DB_USER;
+const dbPassword = encodeURIComponent(process.env.DB_PASSWORD);
+const dbHost = process.env.DB_HOST;
+const dbName = process.env.DB_NAME;
+const dbOptions = process.env.DB_OPTIONS;
 
 const connectDB = async () => {
   try {
     await mongoose.connect(
-      `mongodb+srv://saugatneupane50:${encodeURIComponent(
-        "saugatneupane50"
-      )}@cluster0.oppoqsr.mongodb.net/instagram?retryWrites=true&w=majority&appName=Cluster0`
+      `mongodb+srv://${dbUserName}:${dbPassword}@${dbHost}/${dbName}?${dbOptions}`
     );
     console.log("DB connection established..");
   } catch (error) {

@@ -14,7 +14,7 @@ app.use("/user", userRoutes);
 await connectDB();
 
 // assign PORT
-const PORT = 8002;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`App is listening on port ${PORT}`);

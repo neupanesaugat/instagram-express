@@ -71,8 +71,8 @@ router.get("/login", async (req, res) => {
 
   // generate access token
   const payload = { username: user.username };
-  const sign = "khfaiuarhlksad";
-  const token = jwt.sign(payload, sign);
+  const secretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
+  const token = jwt.sign(payload, secretKey);
 
   return res
     .status(200)

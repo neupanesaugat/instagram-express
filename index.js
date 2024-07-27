@@ -1,6 +1,7 @@
 import express from "express";
 import connectDB from "./database-connection/connect-db.js";
 import userRoutes from "./user/user.controller.js";
+import postRoutes from "./user-post/post.controller.js";
 
 const app = express();
 
@@ -9,6 +10,7 @@ app.use(express.json());
 
 // routes
 app.use("/user", userRoutes);
+app.use("/post", postRoutes);
 
 // DB connection
 await connectDB();
